@@ -392,7 +392,7 @@ const Progressbar: React.FC = () => {
     setVisible(true);
     setLabel(data.label);
     setDuration(data.duration);
-    setIcon(data.icon || 'clock'); // Default to clock icon
+    setIcon((data.icon || 'clock') as IconProp);
     setPercentage(0);
   });
 

@@ -228,6 +228,7 @@ const ListMenu: React.FC = () => {
                           item={item}
                           scrollIndex={indexStates[index]}
                           checked={checkedStates[index]}
+                          selected={index === selected}
                           ref={listRefs}
                         />
                       )}

@@ -16,6 +16,7 @@ export interface MenuItem {
   iconAnimation?: IconAnimation;
   defaultIndex?: number;
   close?: boolean;
+  disabled?: boolean;
 }
 
 export interface MenuSettings {

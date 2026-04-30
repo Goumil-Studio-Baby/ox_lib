@@ -209,7 +209,7 @@ const ListItem = forwardRef<Array<HTMLDivElement | null>, Props>(({ item, index,
         ) : item.checked !== undefined ? (
           <Group position="apart" w="100%">
             <Text className={classes.mainText}>{item.label}</Text>
-            <CustomCheckbox checked={checked} colorScheme={item.colorScheme}></CustomCheckbox>
+            <CustomCheckbox checked={checked}></CustomCheckbox>
           </Group>
         ) : item.progress !== undefined ? (
           <Stack className={classes.progressStack} spacing={0}>
