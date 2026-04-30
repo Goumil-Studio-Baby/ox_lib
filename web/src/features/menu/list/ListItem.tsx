@@ -5,75 +5,165 @@ import type { MenuItem } from '../../../typings';
 import { isIconUrl } from '../../../utils/isIconUrl';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import LibIcon from '../../../components/LibIcon';
+import { useGlassStyle } from '../../../hooks/useGlassStyle';
+import { useSafeTheme } from '../../../hooks/useSafeTheme';
 
 interface Props {
   item: MenuItem;
   index: number;
   scrollIndex: number;
   checked: boolean;
+  selected: boolean;
 }
 
-const useStyles = createStyles((theme, params: { iconColor?: string }) => ({
-  buttonContainer: {
-    backgroundColor: theme.colors.dark[6],
-    borderRadius: theme.radius.md,
-    padding: 2,
-    height: 60,
-    scrollMargin: 8,
-    '&:focus': {
-      backgroundColor: theme.colors.dark[4],
-      outline: 'none',
-    },
-  },
-  iconImage: {
-    maxWidth: 32,
-  },
-  buttonWrapper: {
-    paddingLeft: 5,
-    paddingRight: 12,
-    height: '100%',
-  },
-  iconContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    width: 32,
-    height: 32,
-  },
-  icon: {
-    fontSize: 24,
-    color: params.iconColor || theme.colors.dark[2],
-  },
-  label: {
-    color: theme.colors.dark[2],
-    textTransform: 'uppercase',
-    fontSize: 12,
-    verticalAlign: 'middle',
-  },
-  chevronIcon: {
-    fontSize: 14,
-    color: theme.colors.dark[2],
-  },
-  scrollIndexValue: {
-    color: theme.colors.dark[2],
-    textTransform: 'uppercase',
-    fontSize: 14,
-  },
-  progressStack: {
-    width: '100%',
-    marginRight: 5,
-  },
-  progressLabel: {
-    verticalAlign: 'middle',
-    marginBottom: 3,
-  },
-}));
+const useStyles = createStyles((theme, params: { iconColor?: string; selected: boolean; colorScheme?: string; disabled?: boolean; glass: ReturnType<typeof useGlassStyle> }) => {
+  
+  const safeTheme = useSafeTheme();
+  const itemColor = params.colorScheme 
+    ? safeTheme.colors[params.colorScheme]?.[safeTheme.fn.primaryShade()] || safeTheme.colors[params.colorScheme]?.[8] || params.colorScheme
+    : safeTheme.colors[safeTheme.primaryColor][safeTheme.fn.primaryShade()];
+  
+  const getRgbFromHex = (hex: string) => {
+    const result = hex.replace('#', '').match(/.{2}/g);
+    return result ? result.map(h => parseInt(h, 16)).join(', ') : '239, 68, 68';
+  };
+  
+  const itemColorRgb = itemColor.startsWith('#') ? getRgbFromHex(itemColor) : '239, 68, 68';
 
-const ListItem = forwardRef<Array<HTMLDivElement | null>, Props>(({ item, index, scrollIndex, checked }, ref) => {
-  const { classes } = useStyles({ iconColor: item.iconColor });
+  return {
+    buttonContainer: {
+      background: params.disabled
+        ? 'rgba(255, 255, 255, 0.03)'
+        : params.selected
+          ? 'var(--ox-item-hover)'
+          : 'var(--ox-item-bg)',
+      border: params.disabled
+        ? '1px solid rgba(255, 255, 255, 0.06)'
+        : params.selected
+          ? `1px solid ${itemColor}`
+          : '1px solid var(--ox-border)',
+      borderRadius: 12,
+      padding: 2,
+      minHeight: 60,
+      height: 'auto',
+      scrollMargin: 8,
+      boxShadow: params.disabled
+        ? '0 2px 8px rgba(0, 0, 0, 0.1)'
+        : params.selected
+          ? `0 6px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 20px rgba(${itemColorRgb}, 0.3)`
+          : '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+      transition: 'all 0.2s ease',
+      outline: 'none',
+      position: 'relative',
+      overflow: 'hidden',
+      cursor: params.disabled ? 'not-allowed' : 'default',
+      '&:focus': {
+        outline: 'none',
+      },
+    },
+    iconImage: {
+      maxWidth: 32,
+      filter: params.disabled 
+        ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) grayscale(100%) opacity(0.4)' 
+        : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
+    },
+    buttonWrapper: {
+      paddingLeft: 5,
+      paddingRight: 12,
+      minHeight: '56px',
+      alignItems: 'flex-start',
+      paddingTop: 8,
+      paddingBottom: 8,
+    },
+    iconContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 32,
+      height: 32,
+      marginTop: 4,
+    },
+    icon: {
+      fontSize: 24,
+      color: params.disabled 
+        ? 'rgba(255, 255, 255, 0.4)' 
+        : params.iconColor || '#ffffff',
+      textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+      filter: params.disabled 
+        ? 'none' 
+        : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
+    },
+    label: {
+      color: params.disabled ? 'rgba(255, 255, 255, 0.3)' : 'var(--ox-text-primary)',
+      textTransform: 'uppercase',
+      fontSize: 12,
+      verticalAlign: 'middle',
+      fontFamily: 'Roboto',
+      fontWeight: 500,
+      textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+      letterSpacing: '0.5px',
+    },
+    mainText: {
+      color: params.disabled ? 'rgba(255, 255, 255, 0.4)' : 'var(--ox-text-primary)',
+      fontSize: 15,
+      fontFamily: 'Roboto',
+      fontWeight: 500,
+      textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+      lineHeight: 1.3,
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
+    },
+    descriptionText: {
+      color: params.disabled ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.85)',
+      fontSize: 13,
+      fontFamily: 'Roboto',
+      fontWeight: 400,
+      textShadow: '0 1px 3px rgba(0, 0, 0, 0.6)',
+      lineHeight: 1.4,
+      marginTop: 2,
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
+    },
+    chevronIcon: {
+      fontSize: 14,
+      color: params.disabled ? 'rgba(255, 255, 255, 0.4)' : 'var(--ox-text-primary)',
+      textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+    },
+    scrollIndexValue: {
+      color: params.disabled ? 'rgba(255, 255, 255, 0.4)' : 'var(--ox-text-primary)',
+      textTransform: 'uppercase',
+      fontSize: 14,
+      fontFamily: 'Roboto',
+      fontWeight: 500,
+      textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+    },
+    progressStack: {
+      width: '100%',
+      marginRight: 5,
+    },
+    progressLabel: {
+      color: params.disabled ? 'rgba(255, 255, 255, 0.4)' : 'var(--ox-text-primary)',
+      fontSize: 15,
+      fontFamily: 'Roboto',
+      fontWeight: 500,
+      textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+      verticalAlign: 'middle',
+      marginBottom: 3,
+    },
+    textStack: {
+      width: '100%',
+      gap: 0,
+    },
+  };
+});
+
+const ListItem = forwardRef<Array<HTMLDivElement | null>, Props>(({ item, index, scrollIndex, checked, selected }, ref) => {
+  const glass = useGlassStyle();
+  const { classes } = useStyles({ iconColor: item.iconColor, selected, colorScheme: item.colorScheme, disabled: item.disabled, glass });
 
   return (
     <Box
-      tabIndex={index}
+      tabIndex={item.disabled ? -1 : index}
       className={classes.buttonContainer}
       key={`item-${index}`}
       ref={(element: HTMLDivElement) => {
@@ -101,7 +191,7 @@ const ListItem = forwardRef<Array<HTMLDivElement | null>, Props>(({ item, index,
           <Group position="apart" w="100%">
             <Stack spacing={0} justify="space-between">
               <Text className={classes.label}>{item.label}</Text>
-              <Text>
+              <Text className={classes.mainText}>
                 {typeof item.values[scrollIndex] === 'object'
                   ? // @ts-ignore for some reason even checking the type TS still thinks it's a string
                     item.values[scrollIndex].label
@@ -118,20 +208,44 @@ const ListItem = forwardRef<Array<HTMLDivElement | null>, Props>(({ item, index,
           </Group>
         ) : item.checked !== undefined ? (
           <Group position="apart" w="100%">
-            <Text>{item.label}</Text>
-            <CustomCheckbox checked={checked}></CustomCheckbox>
+            <Text className={classes.mainText}>{item.label}</Text>
+            <CustomCheckbox checked={checked} colorScheme={item.colorScheme}></CustomCheckbox>
           </Group>
         ) : item.progress !== undefined ? (
           <Stack className={classes.progressStack} spacing={0}>
             <Text className={classes.progressLabel}>{item.label}</Text>
             <Progress
               value={item.progress}
-              color={item.colorScheme || 'dark.0'}
-              styles={(theme) => ({ root: { backgroundColor: theme.colors.dark[3] } })}
+              color={item.colorScheme || 'red'}
+              styles={(progressTheme) => {
+            
+                const safeProgressTheme = useSafeTheme();
+                // Respect the colorScheme property or fall back to theme color
+                const colorToUse = item.colorScheme || safeProgressTheme.primaryColor;
+                const colorValue = safeProgressTheme.colors[colorToUse]?.[safeProgressTheme.fn.primaryShade()] || safeProgressTheme.colors.red[8];
+                
+                return {
+                  root: { 
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: 6,
+                    overflow: 'hidden',
+                  },
+                  bar: {
+                    background: `linear-gradient(90deg, ${colorValue}, rgba(255, 255, 255, 0.9))`,
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                  }
+                };
+              }}
             />
           </Stack>
         ) : (
-          <Text>{item.label}</Text>
+          <Stack className={classes.textStack} spacing={0}>
+            <Text className={classes.mainText}>{item.label}</Text>
+            {item.description && (
+              <Text className={classes.descriptionText}>{item.description}</Text>
+            )}
+          </Stack>
         )}
       </Group>
     </Box>
